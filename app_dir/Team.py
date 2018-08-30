@@ -98,10 +98,12 @@ class Team():
             print("Couldn't authenticate!")
 
         # Specifically use GSSAPI mechanism
-        self.ldap_obj.sasl_gssapi_bind_s(serverctrls=None,
-                                         clientctrls=None,
-                                         sasl_flags=ldap.SASL_QUIET,
-                                         authz_id="")
+        # Commented the code below so that bzreports can run
+        # without having to autenticate
+        # self.ldap_obj.sasl_gssapi_bind_s(serverctrls=None,
+        #                                  clientctrls=None,
+        #                                  sasl_flags=ldap.SASL_QUIET,
+        #                                  authz_id="")
 
     def ldap_emp_uid(self, emp):
         """
