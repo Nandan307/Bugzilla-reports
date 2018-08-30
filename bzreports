@@ -97,7 +97,9 @@ def email_reports_rhel_prepare(bzquery, html_template_file_name,
                   body=txt_msg,
                   html=html_msg,
                   sender="sender@companyname.com",
-                  recipients=["recipient1@companyname.com", "recipient2@companyname.com"])
+                  recipients=emp_email_list)
+                  # Harcode if necessary (usually for testing)
+                  # recipients=["recipient1@companyname.com", "recipient2@companyname.com"])
 
     # Sending the email through Flask
     with app.app_context():
