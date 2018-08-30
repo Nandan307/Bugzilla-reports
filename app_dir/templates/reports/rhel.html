@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <table>
+    <th>Bug_ID</th>
+    <th>Component</th>
+    <th>Sub-component</th>
+    <th>Assigned_to</th>
+    <th>Summary</th>
+    
+    {% for bug in bugs %}
+    <tr>
+      <td><a href="https://bugzilla.companyname.com/show_bug.cgi?id={{bug.id}}">{{bug.id}}</a></td>
+      <td>{{bug.component}}</td>
+      <td>{{bug.sub_component}}</td>
+      <td>{{bug.assigned_to}}</td>
+      <td>{{bug.summary}}</td>
+    </tr>
+    {% endfor %}
+
+  </table> 
+ 
+{% endblock %}

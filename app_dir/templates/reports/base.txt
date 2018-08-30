@@ -1,0 +1,3 @@
+{{ "%-15s"|format("Bug ID") }}  {{ "%-40s"|format("Component") }}  {{ "%-40s"|format("Sub-component") }}  {{ "%-30s"|format("Assigned_to") }}
+{{ "%s"|format("Summary") }}
+{% block content %}{% endblock %}

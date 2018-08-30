@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+import os
+import click
+import bugzilla
+import logging
+
+from flask import Flask, render_template, Blueprint
+from flask_mail import Mail, Message
+
+from app_dir.routes import routing
+from app_dir.reports import bugzilla_bzreports
+from app_dir import BZ
+from app_dir import Team
+from app_dir.reports import config
+
+logging.basicConfig(filename="bzreports.log", level=logging.DEBUG)
+
+# Setting up Flask application
+bzreports_path = os.path.abspath("")
+app = Flask(__name__, template_folder=bzreports_path +
+            "/app_dir/templates/reports",
+            static_url_path=bzreports_path + "/app_dir/static")
+
+
+# Registering "routing" Blueprint from "app_dir/routes.py"
+app.register_blueprint(routing)
+
+
+@click.group()
+def bzreports():
+    """
+    Utility to generate BZ reports
+
+    This utility generates BZ reports, and the associated functions 
+    required to generate the reports (such as team member updates.)
+
+    Please run "$ ./bzreports update-team" to get started.
+    """
+    pass
+
+
+@click.command(name='update-team')
+def update_team():
+    t_obj = Team.Team("active_team.json")
+    t_obj.Update(ldap_url="ldap://ldap.companyname.com",
+                 ldap_base="ou=users,dc=companyname,dc=com",
+                 email_alias_base="ou=mx,dc=companyname,dc=com",
+                 skip=[],
+                 static_members={"XYZ": ["xyz@companyname.com"]})
+    logging.debug("Processed given data from update_team function")
+
+
+# Command Line Option to run the server
+# from bzreports CLI tool itself
+@click.command(name="run")
+def run():
+    logging.debug("About to run app.run()")
+    app.run(debug=True)
+
+
+# Once this command is run, Text and HTML formatted RHEL Bug report
+# emails will be sent to the all recipients in emp_email_list
+def email_reports_rhel_prepare(bzquery, html_template_file_name,
+                               txt_template_file_name,
+                               email_subject, product_name=None):
+    team_obj = Team.Team("active_team.json")
+    bz = BZ.BZ()
+
+    # Same query for rhel, rhel-stale and rhel-blockers (confidential)
+    if bzquery == "rhel":
+        bugs = bugzilla_bzreports.bz_fetch_bugs(bz, team_obj, product_name)
+
+    elif bzquery == "stale":
+        bugs = bugzilla_bzreports.bz_fetch_bugs(bz, team_obj, product_name)
+
+    elif bzquery == "blockers":
+        bugs = bugzilla_bzreports.bz_fetch_bugs(bz, team_obj, product_name)
+
+    else:
+        logging.debug("bz_fetch_bugs() couldn't fetch bugs. Recheck the query!")
+        
+    # MAIL configuration
+    config.mail_config(app)
+    mail_obj = Mail(app)
+
+    # List of emails rendered from the file read above    
+    emp_email_list = team_obj.all_emails()
+
+    # txt_msg and html_msg consists of text and HTML data rendered
+    # from render_template respectively
+    with app.app_context():
+          html_msg = render_template(html_template_file_name, bugs=bugs)
+          txt_msg = render_template(txt_template_file_name, bugs=bugs)
+
+    # Setting the message fields
+    msg = Message(subject=email_subject,
+                  body=txt_msg,
+                  html=html_msg,
+                  sender="sender@companyname.com",
+                  recipients=["recipient1@companyname.com", "recipient2@companyname.com"])
+
+    # Sending the email through Flask
+    with app.app_context():
+        mail_obj.send(msg)
+        
+        
+# Created for the subcommands follwoing "mail" option
+@click.group()
+def mail():
+    pass
+
+
+# Example: ./bzreports mail rhel --version=6
+@click.command()
+@click.option('--version', type=click.STRING, nargs=1, default="7")
+def rhel(version):
+    logging.debug('rhel version: %s' % version)
+    email_reports_rhel_prepare("rhel", "rhel.html",
+                               "rhel.txt",
+                               "RHEL-" + version + " Bugs report",
+                               "Red Hat Enterprise Linux " + version)
+
+
+# Example: ./bzreports mail rhel-stale
+# All versions
+@click.command(name="rhel-stale")
+def rhel_stale():
+    logging.debug('rhel-stale called (no version required)')
+    email_reports_rhel_prepare("stale", "rhel.html",
+                               "rhel.txt",
+                               "RHEL-5,6,7 Stale Bugs report")
+
+
+# Example: ./bzreports mail rhel-blockers --version=6
+@click.command(name="rhel-blockers")
+@click.option('--version', type=click.STRING, nargs=1, default="7")
+def rhel_blockers(version):
+    logging.debug('rhel-blockers version: %s' % version)
+    email_reports_rhel_prepare("blockers", "rhel_blockers.html",
+                               "rhel_blockers.txt",
+                               "RHEL-" + version + " Blocker Bugs report",
+                               "Red Hat Enterprise Linux " + version)
+
+
+# Adding sub-commands to mail
+mail.add_command(rhel_stale)
+mail.add_command(rhel)
+mail.add_command(rhel_blockers)
+
+# Adding commands to bzreports
+bzreports.add_command(update_team)
+bzreports.add_command(run)
+bzreports.add_command(mail)
+
+
+if __name__ == "__main__":
+    bzreports()

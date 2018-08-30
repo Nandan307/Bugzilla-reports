@@ -1,0 +1,15 @@
+{
+ "ABC": [
+     "abc@companyname.com"
+ ],
+ "DEF": [
+     "def@companyname.com",
+     "def_new@companyname.com"
+     
+ ],
+ "GHI": [
+     "ghi@companyname.com",
+     "ghi_1@companyname.com",
+     "ghi_2@companyname.com",
+     "ghi_3@companyname.com"
+}

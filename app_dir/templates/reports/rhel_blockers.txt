@@ -1,0 +1,9 @@
+{% extends "base.txt" %}
+
+{% block content %}
+  {% for blocker_bug in bugs %}
+{{"%-15s"|format(blocker_bug.id) }}  {{ "%-40s"|format(blocker_bug.component) }}  {{ "%-40s"|format(blocker_bug.sub_component) }}  {{ "%-30s"|format(blocker_bug.assigned_to) }}
+{{ blocker_bug.summary }}
+  {% endfor %}
+
+{% endblock %}

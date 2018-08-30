@@ -1,0 +1,9 @@
+{% extends "base.txt" %}
+
+{% block content %}
+  {% for stale_bug in bugs %}
+{{"%-15s"|format(stale_bug.id) }}  {{ "%-40s"|format(stale_bug.component) }}  {{ "%-40s"|format(stale_bug.sub_component) }}  {{ "%-30s"|format(stale_bug.assigned_to) }}
+{{ stale_bug.summary }}
+  {% endfor %}
+
+{% endblock %}
