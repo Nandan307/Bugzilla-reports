@@ -8,13 +8,9 @@ while adding a few new ones) that is used for the positional hierarchy.
 
 
 Getting started:
-
-1. $ cd Bugzilla-reports
-
-   $ ./bzreports update-team
    
  
-2. Change the config settings in `app_dir/reports/config.py`
+1. Change the config settings in `app_dir/reports/config.py`
    
    Note: `manager_name` is the name of the manager who is on top of the hierarchy
    
@@ -28,6 +24,11 @@ Getting started:
                    E  F                <== indirect reports
                     
 
-3. In `bzreports`, edit the arguments in `def update_team()` as per your convinience.
+2. In `bzreports`, edit the arguments in `def update_team()` as per your convinience.
    Once done, add the sender's and recipients' email on line 99 and 100 respectively.
-   
+ 
+ 
+
+3. $ cd Bugzilla-reports
+
+   $ ./bzreports update-team
